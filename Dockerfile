@@ -1,3 +1,4 @@
+# openclaw railway template
 FROM node:22-bookworm
 
 RUN apt-get update \
