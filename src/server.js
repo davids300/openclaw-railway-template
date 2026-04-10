@@ -1093,6 +1093,25 @@ app.post("/setup/api/reset", requireSetupAuth, async (_req, res) => {
   }
 });
 
+app.post("/setup/api/purge-sessions", requireSetupAuth, async (_req, res) => {
+  try {
+    const sessionsDir = path.join(STATE_DIR, "agents", "main", "sessions");
+    if (!fs.existsSync(sessionsDir)) {
+      return res.json({ ok: true, message: "No sessions directory found" });
+    }
+    const files = fs.readdirSync(sessionsDir);
+    let deleted = 0;
+    for (const f of files) {
+      const fp = path.join(sessionsDir, f);
+      fs.rmSync(fp, { force: true });
+      deleted++;
+    }
+    return res.json({ ok: true, message: `Purged ${deleted} session files` });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: String(err) });
+  }
+});
+
 app.post("/setup/api/doctor", requireSetupAuth, async (_req, res) => {
   const args = ["doctor", "--non-interactive", "--repair"];
   const result = await runCmd(OPENCLAW_NODE, clawArgs(args));
